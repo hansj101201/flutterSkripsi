@@ -44,7 +44,7 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
       if (_selectedDate == null){
         dateController.text = 'Pilih Tanggal';
       } else {
-          dateController.text = '${_selectedDate!.day.toString().padLeft(2, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.year}';
+        dateController.text = '${_selectedDate!.day.toString().padLeft(2, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.year}';
       }
       print('Date selected: $_selectedDate');
       // Tambahkan logika untuk menggunakan tanggal yang dipilih
@@ -71,25 +71,25 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                 SizedBox(height: 20,),
                 Center(
                   child:
-                    SizedBox(
-                      width: 200, // Atur lebar sesuai kebutuhan
-                      height: 50, // Atur tinggi sesuai kebutuhan
-                      child: GestureDetector(
-                        onTap: () {
-                          _selectDate(context); // Panggil method untuk menampilkan date picker
-                        },
-                        child: AbsorbPointer(
-                          child: TextFormField(
-                            readOnly: true,
-                            controller: dateController,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              suffixIcon: Icon(Icons.calendar_today),
-                            ),
+                  SizedBox(
+                    width: 200, // Atur lebar sesuai kebutuhan
+                    height: 50, // Atur tinggi sesuai kebutuhan
+                    child: GestureDetector(
+                      onTap: () {
+                        _selectDate(context); // Panggil method untuk menampilkan date picker
+                      },
+                      child: AbsorbPointer(
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: dateController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.calendar_today),
                           ),
                         ),
                       ),
                     ),
+                  ),
                 ),
                 SizedBox(height: 10.0),
                 Expanded(

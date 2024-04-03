@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/View/BarangView.dart';
+import 'package:flutter_skripsi/View/PermintaanCanvasView.dart';
 import 'package:flutter_skripsi/View/StockCanvasView.dart';
 import 'package:flutter_skripsi/ViewModel/BarangViewModel.dart';
-import 'package:flutter_skripsi/ViewModel/SharedPref.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 class Home extends StatefulWidget {
   final Map<String, dynamic> salesmanData;
