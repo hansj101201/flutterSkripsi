@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_skripsi/ViewModel/BarangViewModel.dart';
+import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class StockCanvasView extends StatefulWidget {
-  final BarangViewModel viewModel;
+  final ViewModel viewModel;
   final Map<String, dynamic> salesmanData;
 
   StockCanvasView({required this.viewModel, required this.salesmanData});

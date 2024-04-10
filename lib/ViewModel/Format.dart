@@ -16,3 +16,11 @@ String getPeriode(String tanggal) {
 
   return yyyymm;
 }
+
+String formatHarga(int harga) {
+  // Menggunakan metode toLocaleString untuk mengonversi angka menjadi format dengan pemisah ribuan
+  return harga.toString().replaceAllMapped(
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (Match match) => '${match[1]},',
+  );
+}

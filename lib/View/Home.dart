@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_skripsi/View/PengembalianCanvas.dart';
+import 'package:flutter_skripsi/View/PenjualanCanvas.dart';
 import 'package:flutter_skripsi/View/PermintaanCanvasView.dart';
 import 'package:flutter_skripsi/View/StockCanvasView.dart';
-import 'package:flutter_skripsi/ViewModel/BarangViewModel.dart';
+import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class Home extends StatefulWidget {
   final Map<String, dynamic> salesmanData;
@@ -14,14 +16,14 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late String idSales;
-  final barangViewModel = BarangViewModel();
+  final viewModel = ViewModel();
+  // final gudangViewModel = GudangViewModel();
 
   @override
   void initState() {
     super.initState();
     print('Salesman Data: ${widget.salesmanData['ID_SALES']}');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class _HomeState extends State<Home> {
               onPressed: () {
                 // Tambahkan logika untuk navigasi ke halaman lain di sini
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => PermintaanKanvas(viewModel: barangViewModel, salesmanData: widget.salesmanData,)),
+                  MaterialPageRoute(builder: (context) => PermintaanKanvas(viewModel: viewModel, salesmanData: widget.salesmanData,)),
                 );
               },
               child: Text('Tambah Permintaan Kanvas'),
@@ -58,12 +60,31 @@ class _HomeState extends State<Home> {
             SizedBox(height: 10.0),
             ElevatedButton(
               onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => PenjualanView(viewModel: viewModel, salesmanData: widget.salesmanData)),
+                );
+              },
+              child: Text('Penjualan'),
+            ),
+            SizedBox(height: 10.0),
+            ElevatedButton(
+              onPressed: () {
                 // Tambahkan logika untuk navigasi ke halaman lain di sini
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => StockCanvasView(viewModel: barangViewModel, salesmanData: widget.salesmanData,)),
+                  MaterialPageRoute(builder: (context) => StockCanvasView(viewModel: viewModel, salesmanData: widget.salesmanData,)),
                 );
               },
               child: Text('Lihat Stok Kanvas'),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              onPressed: () {
+                // Tambahkan logika untuk navigasi ke halaman lain di sini
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => PengembalianCanvasView(viewModel: viewModel, salesmanData: widget.salesmanData,)),
+                );
+              },
+              child: Text('Pengembalian Barang Kanvas'),
             ),
           ],
         ),

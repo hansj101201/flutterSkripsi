@@ -27,15 +27,5 @@ class Barang {
       namaSatuan: json['nama_satuan']
     );
   }
-  String operator [](String key) {
-    switch (key) {
-      case 'id':
-        return id;
-      case 'nama':
-        return nama;
-      default:
-        throw Exception('Key not found');
-    }
-  }
 
 }

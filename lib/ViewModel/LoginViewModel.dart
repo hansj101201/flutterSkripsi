@@ -22,9 +22,12 @@ class LoginViewModel {
 
       Map<String, dynamic> salesmanDataMap = responseData['salesman'][0];
       // Simpan data salesman ke shared_preferences
+      DateTime now = DateTime.now();
+      // Format tanggal ke dalam format 'yyyy-MM-dd'
+      String formattedDate = "${now.year}-${_addZeroPrefix(now.month)}-${_addZeroPrefix(now.day)}";
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('salesman', jsonEncode(salesmanDataMap));
-
+      await prefs.setString('loginTime', DateTime.now().toString());
 
       // Jika login sukses, kembalikan true
       print("Behasil Login");
@@ -46,4 +49,11 @@ class LoginViewModel {
       return false;
     }
   }
+}
+
+String _addZeroPrefix(int number) {
+  if (number < 10) {
+    return '0$number';
+  }
+  return '$number';
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_skripsi/ViewModel/BarangViewModel.dart';
 import 'package:flutter_skripsi/ViewModel/Format.dart';
 import 'package:flutter_skripsi/ViewModel/PermintaanViewModel.dart';
+import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class PermintaanKanvas extends StatefulWidget {
-  final BarangViewModel viewModel;
+  final ViewModel viewModel;
   final Map<String, dynamic> salesmanData;
 
   PermintaanKanvas({required this.viewModel, required this.salesmanData});
@@ -70,18 +72,18 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
               children: [
                 SizedBox(height: 20,),
                 Center(
-                  child:
-                  SizedBox(
-                    width: 200, // Atur lebar sesuai kebutuhan
-                    height: 50, // Atur tinggi sesuai kebutuhan
+                  child: SizedBox(
+                    width: 300,
+                    height: 80,
                     child: GestureDetector(
                       onTap: () {
-                        _selectDate(context); // Panggil method untuk menampilkan date picker
+                        _selectDate(context);
                       },
                       child: AbsorbPointer(
                         child: TextFormField(
                           readOnly: true,
                           controller: dateController,
+                          style: TextStyle(fontSize: 30),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             suffixIcon: Icon(Icons.calendar_today),
@@ -153,6 +155,9 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                                       controller: controllers[index],
                                       textAlign: TextAlign.center,
                                       keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly // Hanya mengizinkan input angka
+                                      ],
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
                                       ),
@@ -235,7 +240,7 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                           actions: <Widget>[
                             ElevatedButton(
                               onPressed: () async {
-                                final success = await permintaanViewModel.postPermintaanSales(
+                                final success = await widget.viewModel.postPermintaanSales(
                                     dateController.text,
                                     widget.salesmanData['ID_SALES'],
                                     widget.salesmanData['ID_GUDANG'],
