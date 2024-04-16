@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_skripsi/View/Home.dart';
+import 'package:flutter_skripsi/ViewModel/LocalAuth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String?> getIdSalesFromSharedPreferences() async {
@@ -27,18 +30,7 @@ Future<Map<String, dynamic>> checkSalesmanSharedPreferences() async {
   }
 }
 
-Future<void> removeSalesmanSharedPreferences() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('salesman');
-}
-
-// Fungsi untuk menghapus data 'loginTime' dari SharedPreferences
-Future<void> removeLoginTime() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('loginTime');
-}
-
-Future<void> checkLoginTimeAndRemove() async {
+Future<void> checkLoginTimeAndSetLoggedOut() async {
   String? loginTime = await getLoginTime();
   if (loginTime != null) {
     DateTime previousLogin = DateTime.parse(loginTime);
@@ -51,8 +43,28 @@ Future<void> checkLoginTimeAndRemove() async {
         previousLogin.month != now.month ||
         previousLogin.day != now.day) {
       // Jika berbeda hari, hapus data dari SharedPreferences
-      await removeSalesmanSharedPreferences();
-      await removeLoginTime();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false);
     }
+  }
+}
+
+Future<bool> checkIfLoggedIn() async {
+  // Mendapatkan instance dari Shared Preferences
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  // Mengecek nilai isLoggedIn di Shared Preferences
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  return isLoggedIn;
+}
+
+Future<bool> checkFingerprintLoginStatus() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? fingerprintLoginEnabled = prefs.getBool('fingerprintLogin');
+
+    return fingerprintLoginEnabled == true;
+  } catch (e) {
+    print('Error: $e');
+    return false;
   }
 }

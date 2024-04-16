@@ -1,40 +1,57 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_skripsi/View/Home.dart';
 import 'package:flutter_skripsi/View/Login.dart';
+import 'package:flutter_skripsi/View/LoginWithData.dart'; // Import LoginWithData.dart
 import 'package:flutter_skripsi/ViewModel/SharedPref.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Memastikan bahwa WidgetsFlutterBinding sudah diinisialisasi
-  await checkLoginTimeAndRemove();
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await checkLoginTimeAndSetLoggedOut();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: checkSalesmanSharedPreferences(),
+    return FutureBuilder<bool>(
+      future: checkIfLoggedIn(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          print(snapshot);
-          if (snapshot.hasData && (snapshot.data! as Map).isNotEmpty) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: Home(salesmanData: snapshot.data!),
-            );
-          } else {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: Login(),
-            );
-          }
+          final bool isLoggedIn = snapshot.data ?? false; // Mengambil nilai boolean dari snapshot.data
+          print(isLoggedIn);
+          return FutureBuilder<Map<String, dynamic>>(
+            future: checkSalesmanSharedPreferences(),
+            builder: (context, snapshot1) {
+              if (snapshot1.connectionState == ConnectionState.done) {
+                if (snapshot1.hasData && (snapshot1.data! as Map).isNotEmpty) {
+                  print(snapshot1.data);
+                  return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: isLoggedIn ? Home(salesmanData: snapshot1.data!) : LoginWithData(salesmanData: snapshot1.data!),
+                  );
+                } else {
+                  // Jika tidak ada data salesman, arahkan ke halaman login
+                  return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: Login(),
+                  );
+                }
+              } else {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
+            },
+          );
         } else {
+          // Ketika masih dalam proses pengecekan apakah pengguna sudah login
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
@@ -47,4 +64,5 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+
 }

@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.flutter_skripsi"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -58,10 +58,14 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    dependencies {
+        implementation "androidx.biometric:biometric:1.1.0"
+    }
 }
 
 flutter {
     source '../..'
 }
 
-dependencies {}
+

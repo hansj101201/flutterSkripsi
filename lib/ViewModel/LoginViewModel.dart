@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginViewModel {
   Future<bool> login(BuildContext context, String userId, String password) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/salesman/login'); // Ganti dengan URL API login Anda
+    final url = Uri.parse('http://192.168.1.11:8000/api/salesman/login'); // Ganti dengan URL API login Anda
     final response = await http.post(
       url,
       body: jsonEncode({'ID_SALES': userId, 'PASSWORD': password}),
@@ -28,6 +28,7 @@ class LoginViewModel {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('salesman', jsonEncode(salesmanDataMap));
       await prefs.setString('loginTime', DateTime.now().toString());
+      await prefs.setBool('isLoggedIn', true);
 
       // Jika login sukses, kembalikan true
       print("Behasil Login");

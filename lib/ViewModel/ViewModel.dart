@@ -24,7 +24,7 @@ class ViewModel {
 
 
   Future<void> getListGudang(String idDepo) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/gudang/getListGudang/?ID_DEPO=$idDepo'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/gudang/getListGudang/?ID_DEPO=$idDepo'));
     if (response.statusCode == 200) {
       // Handle the response data here, for example:
       print(response.body);
@@ -36,7 +36,7 @@ class ViewModel {
     }
   }
   Future<String> getTanggalClosing(String idDepo) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/penjualan/getTanggalClosing/?ID_DEPO=$idDepo'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/penjualan/getTanggalClosing/?ID_DEPO=$idDepo'));
     if (response.statusCode == 200) {
       // Handle the response data here, for example:
       print(response.body);
@@ -50,7 +50,7 @@ class ViewModel {
   }
 
   Future<void> getCustomer(String idSales) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/customer/getCustomer/?ID_SALES=$idSales'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/customer/getCustomer/?ID_SALES=$idSales'));
     if (response.statusCode == 200) {
       // Handle the response data here, for example:
       // print(response.body);
@@ -63,7 +63,7 @@ class ViewModel {
   }
 
   Future<void> fetchBarangsFromApi() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/barang/getAllBarang'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/barang/getAllBarang'));
     if (response.statusCode == 200) {
       print(response.body);
       final List<dynamic> data = jsonDecode(response.body);
@@ -75,7 +75,7 @@ class ViewModel {
   }
 
   Future<void> checkStockSalesFromApi(String idGudang) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/stock/getStockSales/?ID_GUDANG=$idGudang'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/stock/getStockSales/?ID_GUDANG=$idGudang'));
     if (response.statusCode == 200) {
       print(response.body);
       final List<dynamic> data = jsonDecode(response.body);
@@ -87,7 +87,7 @@ class ViewModel {
   }
 
   Future<void> checkStockPenjualan(String idGudang, String date) async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/stock/getStockPenjualan/?ID_GUDANG=$idGudang&TANGGAL=$date'));
+    final response = await http.get(Uri.parse('http://192.168.1.11:8000/api/stock/getStockPenjualan/?ID_GUDANG=$idGudang&TANGGAL=$date'));
     if (response.statusCode == 200) {
       print(response.body);
       final List<dynamic> data = jsonDecode(response.body);
@@ -99,7 +99,7 @@ class ViewModel {
   }
 
   Future<bool> postPengembalianSales(String tanggal, String idSales, String idGudang, String idGudangTujuan, String periode, String idDepo, List<List<dynamic>> data) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/pengembalian/postPengembalian'); // Ganti dengan URL API pengembalian sales Anda
+    final url = Uri.parse('http://192.168.1.11:8000/api/pengembalian/postPengembalian'); // Ganti dengan URL API pengembalian sales Anda
     final response = await http.post(
       url,
       body: jsonEncode({
@@ -124,7 +124,7 @@ class ViewModel {
   }
 
   Future<bool> postPermintaanSales(String tanggal, String idSales, String idGudang, String periode, String idDepo, List<List<dynamic>> data) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/permintaan/postPermintaan'); // Ganti dengan URL API permintaan sales Anda
+    final url = Uri.parse('http://192.168.1.11:8000/api/permintaan/postPermintaan'); // Ganti dengan URL API permintaan sales Anda
     final response = await http.post(
       url,
       body: jsonEncode({
@@ -148,7 +148,7 @@ class ViewModel {
   }
 
   Future<bool> postPenjualan(String tanggal, String idSales, String idGudang, String idCustomer, String periode, String namaCustomer, String idDepo, String jumlah, String discount, String netto, List<List<dynamic>> data) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/penjualan/postPenjualanCanvas'); // Ganti dengan URL API permintaan sales Anda
+    final url = Uri.parse('http://192.168.1.11:8000/api/penjualan/postPenjualanCanvas'); // Ganti dengan URL API permintaan sales Anda
     final response = await http.post(
       url,
       body: jsonEncode({
