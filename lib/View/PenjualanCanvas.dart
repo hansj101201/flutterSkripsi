@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_skripsi/Model/BarangHargaStock.dart';
 import 'package:flutter_skripsi/Model/Customer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,7 @@ class _PenjualanViewState extends State<PenjualanView> {
   List<List<dynamic>> data = [];
   List<List<dynamic>> sendData = [];
   late List<TextEditingController> controllers;
+  late List<BarangHargaStock> displayedBarangs;
   late TextEditingController dateController;
   late TextEditingController gudangController;
   late PengembalianViewModel pengembalianViewModel;
@@ -28,8 +30,11 @@ class _PenjualanViewState extends State<PenjualanView> {
   late TextEditingController totalController;
   late TextEditingController nettoController;
   late TextEditingController potonganController;
+  late String searchText;
+  Map<String, TextEditingController> barangControllers = {};
+  TextEditingController _searchController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  DateTime closingDate = DateTime.now(); // Variable to store the closing date
+  DateTime? closingDate; // Variable to store the closing date
   String? selectedValue;
   String? selectedGudangNama;
   double previousPotongan = 0;
@@ -47,10 +52,29 @@ class _PenjualanViewState extends State<PenjualanView> {
     subtotalController = TextEditingController();
     nettoController = TextEditingController();
     totalController = TextEditingController();
+    displayedBarangs = [];
+    searchText = '';
     potonganController.addListener(() {
       updatePotongan();
     });
     fetchClosingDate();
+    _fetchBarangs();
+  }
+
+  Future<void> _fetchBarangs() async {
+    await widget.viewModel.checkStockPenjualan(
+        widget.salesmanData['ID_GUDANG'], dateController.text);
+    setState(() {
+      displayedBarangs = List.from(widget.viewModel.barangJualan);
+      displayedBarangs.forEach((barangJualan) {
+        if (!barangControllers.containsKey(barangJualan.nama)) {
+          final controller =
+              TextEditingController(text: '0'); // Atur nilai default di sini
+          controllers.add(controller);
+          barangControllers[barangJualan.nama] = controller;
+        }
+      });
+    });
   }
 
   void fetchClosingDate() async {
@@ -108,6 +132,37 @@ class _PenjualanViewState extends State<PenjualanView> {
     gudangController.text = selectedGudangNama!;
   }
 
+  void _searchBarang(String query) {
+    setState(() {
+      searchText = query;
+      if (query.isEmpty) {
+        displayedBarangs = widget.viewModel.barangJualan.toList();
+        controllers.forEach((controller) {
+          final barangController = barangControllers[controller];
+          if (barangController != null && controller.text.isEmpty) {
+            controller.text = barangController.text;
+          }
+        });
+        // Hanya menghapus barangControllers jika sudah tidak ada barang yang ditampilkan
+        if (displayedBarangs.isEmpty) {
+          barangControllers.clear(); // Mengosongkan barangControllers
+        }
+      } else {
+        displayedBarangs = widget.viewModel.barangJualan
+            .where((barang) =>
+            barang.nama.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+        displayedBarangs.forEach((barang) {
+          if (!barangControllers.containsKey(barang.nama)) {
+            final controller = TextEditingController(text: '0');
+            controllers.add(controller);
+            barangControllers[barang.nama] = controller;
+          }
+        });
+      }
+    });
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -133,11 +188,14 @@ class _PenjualanViewState extends State<PenjualanView> {
 
   double calculateSubtotal() {
     double subtotal = 0.0;
-    for (int i = 0; i < data.length; i++) {
-      double harga = data[i][2].toDouble();
-      int jumlah = int.tryParse(controllers[i].text.replaceAll(",", "")) ?? 0;
-      subtotal += harga * jumlah;
-    }
+    displayedBarangs.forEach((barangJualan) {
+      double harga = barangJualan.harga;
+      final controller = barangControllers[barangJualan.nama];
+      if (controller != null) {
+        final value = int.tryParse(controller.text) ?? 0;
+        subtotal += harga *value;
+      }
+    });
     return subtotal;
   }
 
@@ -154,6 +212,7 @@ class _PenjualanViewState extends State<PenjualanView> {
 
     print("${closingDate.toString()} ${dateTime.toString()}");
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back), // Icon bawaan tombol kembali
@@ -178,14 +237,16 @@ class _PenjualanViewState extends State<PenjualanView> {
               onPressed: () {
                 {
                   sendData = [];
-                  for (var item in data) {
-                    if (item[3] != 0) {
-                      if (!sendData.any((element) => element[0] == item[0])) {
-                        sendData
-                            .add([item[0], item[1], item[2], item[3], item[4]]);
+                  displayedBarangs.forEach((barang) {
+                    final controller = barangControllers[barang.nama];
+                    if (controller != null) {
+                      final value = int.tryParse(controller.text) ?? 0;
+                      if (value > 0) {
+                        sendData.add([barang.id, barang.nama, barang.harga, value, barang.harga*value]);
                       }
                     }
-                  }
+                  });
+                  print (sendData);
                   if (selectedValue == null) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Pilih customer terlebih dahulu'),
@@ -452,38 +513,35 @@ class _PenjualanViewState extends State<PenjualanView> {
                               padding: EdgeInsets.only(right: 16.0),
                               child: ElevatedButton(
                                 onPressed: () async {
-                                    final success = await widget
-                                        .viewModel
-                                        .postPenjualan(
-                                            dateController.text,
-                                            widget.salesmanData[
-                                                'ID_SALES'],
-                                            widget.salesmanData[
-                                                'ID_GUDANG'],
-                                            selectedValue!,
-                                            getPeriode(
-                                                dateController.text),
-                                            selectedGudangNama!,
-                                            widget.salesmanData[
-                                                'ID_DEPO'],
-                                            totalController.text.replaceAll(
-                                                ",", "").toString(),
-                                            potonganController.text.replaceAll(
-                                                ",", "").toString(),
-                                            nettoController.text.replaceAll(
-                                                ",", "").toString(),
-                                            sendData);
-                                    if (success) {
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                        content: Text(
-                                            'Gagal menyimpan data'),
-                                        duration: Duration(seconds: 2),
-                                      ));
-                                    }
+                                  final success = await widget.viewModel
+                                      .postPenjualan(
+                                          dateController.text,
+                                          widget.salesmanData['ID_SALES'],
+                                          widget.salesmanData['ID_GUDANG'],
+                                          selectedValue!,
+                                          getPeriode(dateController.text),
+                                          selectedGudangNama!,
+                                          widget.salesmanData['ID_DEPO'],
+                                          totalController.text
+                                              .replaceAll(",", "")
+                                              .toString(),
+                                          potonganController.text
+                                              .replaceAll(",", "")
+                                              .toString(),
+                                          nettoController.text
+                                              .replaceAll(",", "")
+                                              .toString(),
+                                          sendData);
+                                  if (success) {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text('Gagal menyimpan data'),
+                                      duration: Duration(seconds: 2),
+                                    ));
+                                  }
                                 },
                                 child: Text('Proses'),
                               ),
@@ -627,265 +685,271 @@ class _PenjualanViewState extends State<PenjualanView> {
           SizedBox(
             height: 10,
           ),
-
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Cari Barang',
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear), // Icon silang
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchBarang('');
+                    });
+                  },
+                ),
+              ),
+              onChanged: _searchBarang,
+            ),
+          ),
           Expanded(
-            child: dateController.text.isEmpty
-                ? Center(child: Text('Masukkan Tanggal'))
-                : FutureBuilder(
-                    future: widget.viewModel.checkStockPenjualan(
-                        widget.salesmanData['ID_GUDANG'], dateController.text),
-                    builder: (context, snapshot) {
-                      if (dateController.text == 'Pilih Tanggal') {
-                        return Center(
-                            child: Text('Masukkan Tanggal',
-                                style: TextStyle(fontSize: 30)));
-                      } else if (snapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (dateTime.isBefore(closingDate) ||
-                          dateTime.isAtSameMomentAs(closingDate)) {
-                        return Center(
+            child: closingDate == null
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : dateController.text.isEmpty
+                    ? Center(child: Text('Masukkan Tanggal'))
+                    : dateTime.isBefore(closingDate!) ||
+                            dateTime.isAtSameMomentAs(closingDate!)
+                        ? Center(
                             child: Text(
-                                'Tidak dapat input penjualan karena sudah closing',
-                                style: TextStyle(fontSize: 40)));
-                      } else {
-                        return Column(children: [
-                          Flexible(
-                              child: ListView.builder(
-                            itemCount: widget.viewModel.barangJualan.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final barang =
-                                  widget.viewModel.barangJualan[index];
-
-                              if (data.length <= index) {
-                                data.add([
-                                  barang.id,
-                                  barang.nama,
-                                  barang.harga,
-                                  0,
-                                  0,
-                                  barang.saldo,
-                                ]); // Changed to add an int for barang.id
-                                controllers
-                                    .add(TextEditingController(text: '0'));
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0, vertical: 8.0),
-                                child: Column(
-                                  children: [
-                                    ListTile(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 8.0, horizontal: 16.0),
-                                      title: Text(
-                                          '${barang.id} - ${barang.nama}',
-                                          style: TextStyle(fontSize: 30)),
-                                      subtitle: Text(
-                                          'Stok : ${barang.saldo.toStringAsFixed(0)} ${barang.namaSatuan}',
-                                          style: TextStyle(fontSize: 30)),
-                                      trailing: Text(
-                                          'Harga : ${formatHarga(barang.harga.toInt())}',
-                                          style: TextStyle(fontSize: 30)),
-                                      onTap: () {
-                                        // Tambahkan logika untuk menavigasi ke halaman detail barang di sini
-                                      },
-                                    ),
-                                    SizedBox(height: 10.0),
-                                    Container(
-                                      height:
-                                          50, // Atur tinggi sesuai kebutuhan
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
+                              'Tidak dapat input penjualan karena sudah closing',
+                              style: TextStyle(fontSize: 40),
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              Flexible(
+                                child: ListView.builder(
+                                  itemCount: displayedBarangs.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final barangJualan =
+                                        displayedBarangs[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12.0, vertical: 8.0),
+                                      child: Column(
                                         children: [
-                                          GestureDetector(
+                                          ListTile(
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 8.0,
+                                                    horizontal: 16.0),
+                                            title: Text(
+                                                '${barangJualan.id} - ${barangJualan.nama}',
+                                                style: TextStyle(fontSize: 30)),
+                                            subtitle: Text(
+                                                'Stok : ${barangJualan.saldo.toStringAsFixed(0)} ${barangJualan.namaSatuan}',
+                                                style: TextStyle(fontSize: 30)),
+                                            trailing: Text(
+                                                'Harga : ${formatHarga(barangJualan.harga.toInt())}',
+                                                style: TextStyle(fontSize: 30)),
                                             onTap: () {
-                                              final value =
-                                                  data[index][3].toInt();
-                                              if (value > 0) {
-                                                data[index][3] = value - 1;
-                                                controllers[index].text =
-                                                    formatHarga((value - 1));
-                                                data[index][4] =
-                                                    data[index][3].toInt() *
-                                                        data[index][2].toInt();
-                                              }
-                                              updateSubtotal();
+                                              // Tambahkan logika untuk menavigasi ke halaman detail barang di sini
                                             },
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.blue,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '-',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 30.0,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
                                           ),
-                                          SizedBox(width: 10.0),
+                                          SizedBox(height: 10.0),
                                           Container(
-                                            width: 150,
-                                            child: TextField(
-                                              controller: controllers[index],
-                                              textAlign: TextAlign.center,
-                                              inputFormatters: <TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly,
-                                                TextInputFormatter.withFunction(
-                                                    (oldValue, newValue) {
-                                                  // Format angka saat nilainya berubah
-                                                  final newString = formatHarga(
-                                                      int.parse(newValue.text));
-                                                  return TextEditingValue(
-                                                    text: newString,
-                                                    selection:
-                                                        TextSelection.collapsed(
-                                                            offset: newString
-                                                                .length),
-                                                  );
-                                                }),
-                                              ],
-                                              style: TextStyle(
-                                                fontSize: 30,
-                                                color: Colors.black,
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              decoration: InputDecoration(
-                                                border: InputBorder.none,
-                                              ),
-                                              onChanged: (value) {
-                                                final intValue = int.tryParse(
-                                                        value.replaceAll(
-                                                            ",", "")) ??
-                                                    0;
-                                                final maxValue = data[index][5]
-                                                    .toInt(); // Ambil nilai maksimum dari data[index][5]
-                                                if (intValue <= maxValue) {
-                                                  // Periksa apakah nilai kurang dari atau sama dengan maksimum
-                                                  data[index][3] = intValue;
-                                                  data[index][4] = data[index]
-                                                              [3]
-                                                          .toInt() *
-                                                      data[index][2].toInt();
-                                                } else {
-                                                  // Jika nilai melebihi maksimum, kembalikan ke nilai maksimum
-                                                  data[index][3] = maxValue;
-                                                  // Update teks pada TextField agar sesuai dengan nilai maksimum
-                                                  controllers[index].text =
-                                                      formatHarga(maxValue);
-                                                }
-                                                updateSubtotal();
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(width: 10.0),
-                                          GestureDetector(
-                                            onTap: () {
-                                              final value = data[index][3];
-                                              final maxValue = data[index][5]
-                                                  .toInt(); // Ambil nilai maksimum dari data[index][5]
-                                              if (value < maxValue) {
-                                                // Periksa apakah nilai lebih kecil dari maksimum
-                                                data[index][3] = value + 1;
-                                                data[index][4] =
-                                                    data[index][3].toInt() *
-                                                        data[index][2].toInt();
-                                                controllers[index].text =
-                                                    formatHarga((value + 1));
-                                              }
-                                              updateSubtotal();
-                                            },
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.blue,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '+',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 30.0,
+                                            height: 50,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    final controller =
+                                                        barangControllers[
+                                                            barangJualan.nama];
+                                                    if (controller != null) {
+                                                      final value =
+                                                          int.tryParse(
+                                                                  controller
+                                                                      .text) ??
+                                                              0;
+                                                      if (value > 0) {
+                                                        controller.text =
+                                                            (value - 1)
+                                                                .toString();
+                                                      }
+                                                    }
+                                                    updateSubtotal();
+                                                  },
+                                                  child: Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        '-',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 30.0,
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
+                                                SizedBox(width: 10.0),
+                                                Container(
+                                                  width: 150,
+                                                  child: TextFormField(
+                                                    controller:
+                                                        barangControllers[
+                                                            barangJualan.nama],
+                                                    textAlign: TextAlign.center,
+                                                    inputFormatters: <TextInputFormatter>[
+                                                      FilteringTextInputFormatter
+                                                          .digitsOnly,
+
+                                                    ],
+                                                    style: TextStyle(
+                                                      fontSize: 30,
+                                                      color: Colors.black,
+                                                    ),
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    decoration: InputDecoration(
+                                                      border: InputBorder.none,
+                                                    ),
+                                                    onChanged: (value) {
+                                                      final intValue =
+                                                          int.tryParse(value
+                                                                  .replaceAll(
+                                                                      ",",
+                                                                      "")) ??
+                                                              0;
+                                                      final maxValue = barangJualan
+                                                          .saldo
+                                                          .toInt(); // Ambil nilai maksimum dari data[index][5]
+                                                      if (intValue <=
+                                                          maxValue) {
+                                                        // Periksa apakah nilai kurang dari atau sama dengan maksimum
+                                                        barangControllers[
+                                                                    barangJualan
+                                                                        .nama]
+                                                                ?.text =
+                                                            intValue.toString();
+                                                      } else {
+                                                        // Jika nilai melebihi maksimum, kembalikan ke nilai maksimum
+                                                        barangControllers[
+                                                                    barangJualan
+                                                                        .nama]
+                                                                ?.text =
+                                                            maxValue.toString();
+                                                      }
+                                                      updateSubtotal();
+                                                    },
+                                                  ),
+                                                ),
+                                                SizedBox(width: 10.0),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    final controller =
+                                                        barangControllers[
+                                                            barangJualan.nama];
+                                                    if (controller != null) {
+                                                      final value =
+                                                          int.tryParse(
+                                                                  controller
+                                                                      .text) ??
+                                                              0;
+                                                      final maxValue = barangJualan
+                                                          .saldo; // Ambil nilai maksimum dari data[index][5]
+                                                      if (value < maxValue) {
+                                                        controller.text =
+                                                            (value + 1)
+                                                                .toString();
+                                                      }
+                                                    }
+                                                    updateSubtotal();
+                                                  },
+                                                  child: Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        '+',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 30.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 10.0),
+                                              ],
                                             ),
                                           ),
-                                          SizedBox(width: 10.0),
                                         ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                height: 100,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  // Subtotal berada di sebelah kanan
+                                  children: [
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        // Atur margin di sini
+                                        child: Text(
+                                          "Subtotal:",
+                                          style: TextStyle(fontSize: 50),
+                                        ),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        // Atur margin di sini
+                                        child: SizedBox(
+                                          width: 400,
+                                          height: 100,
+                                          child: TextField(
+                                            controller: subtotalController,
+                                            enabled: false,
+                                            // Buat subtotal tidak dapat diedit
+                                            style: TextStyle(
+                                                fontSize: 50,
+                                                color: Colors.black),
+                                            // Mengubah warna teks menjadi hitam
+                                            textAlign: TextAlign.right,
+                                            // Mengatur teks agar rata kanan
+                                            decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                          )),
-                          SizedBox(
-                            height: 10,
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                            ],
                           ),
-                          Container(
-                            height: 100,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              // Subtotal berada di sebelah kanan
-                              children: [
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    // Atur margin di sini
-                                    child: Text(
-                                      "Subtotal:",
-                                      style: TextStyle(fontSize: 50),
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    // Atur margin di sini
-                                    child: SizedBox(
-                                      width: 400,
-                                      height: 100,
-                                      child: TextField(
-                                        controller: subtotalController,
-                                        enabled: false,
-                                        // Buat subtotal tidak dapat diedit
-                                        style: TextStyle(
-                                            fontSize: 50, color: Colors.black),
-                                        // Mengubah warna teks menjadi hitam
-                                        textAlign: TextAlign.right,
-                                        // Mengatur teks agar rata kanan
-                                        decoration: InputDecoration(
-                                          border: InputBorder
-                                              .none, // Menghilangkan garis bawah
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ]);
-                      }
-                    },
-                  ),
           ),
         ],
       ),

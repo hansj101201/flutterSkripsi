@@ -30,11 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.3
+  http: ^1.1.0
   fluttertoast: ^8.0.8
   shared_preferences: ^2.0.8
   intl: ^0.17.0
   local_auth: ^2.0.1
+  google_maps_flutter: ^2.5.3
+  geolocator: ^11.0.0 # Versi terbaru paket geolocator
+  dio: ^4.0.0
+  flutter_polyline_points: ^2.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -63,9 +67,11 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+   - assets/home.png
+   - assets/home_active.png
+   - assets/list.png
+   - assets/list_active.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -20,7 +20,7 @@ class BarangHargaStock {
       id: json['ID_BARANG'],
       harga: double.parse(json['HARGA']),
       maxMulaiBerlaku: json['max_mulai_berlaku'],
-      nama: json['NAMA'],
+      nama: json['NAMASINGKAT'],
       namaSatuan: json['nama_satuan'],
       saldo: double.parse(json['saldo']),
     );

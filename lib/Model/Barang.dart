@@ -20,7 +20,7 @@ class Barang {
   factory Barang.fromJson(Map<String, dynamic> json) {
     return Barang(
       id: json['ID_BARANG'],
-      nama: json['NAMA'],
+      nama: json['NAMASINGKAT'],
       idSatuan: json['ID_SATUAN'],
       minStok: double.parse(json['MIN_STOK']),
       active: json['ACTIVE'],

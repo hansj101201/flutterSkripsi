@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 String getPeriode(String tanggal) {
   var parts = tanggal.split('-');
   var day = int.parse(parts[0]); // Konversi string menjadi integer untuk hari
@@ -19,8 +21,6 @@ String getPeriode(String tanggal) {
 
 String formatHarga(int harga) {
   // Menggunakan metode toLocaleString untuk mengonversi angka menjadi format dengan pemisah ribuan
-  return harga.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match match) => '${match[1]},',
-  );
+  final formatter = NumberFormat("#,###");
+  return formatter.format(harga);
 }

@@ -4,6 +4,7 @@ import 'package:flutter_skripsi/View/Login.dart';
 import 'package:flutter_skripsi/ViewModel/LocalAuth.dart';
 import 'package:flutter_skripsi/ViewModel/LoginViewModel.dart';
 import 'package:flutter_skripsi/ViewModel/SharedPref.dart';
+import 'package:flutter_skripsi/View/NavigationBar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginWithData extends StatefulWidget {
@@ -85,7 +86,7 @@ class _LoginWithDataState extends State<LoginWithData> {
                     print("can authenticate $auth");
                     if (auth) {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => Home(salesmanData:widget.salesmanData)),
+                        MaterialPageRoute(builder: (context) => bottomnav(salesmanData:widget.salesmanData)),
                       );
                     }
                   } else {
