@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_skripsi/View/CustomWillPopScope.dart';
 import 'package:flutter_skripsi/View/CustomerView.dart';
 import 'package:flutter_skripsi/View/Home.dart';
+import 'package:flutter_skripsi/View/TransaksiHome.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class bottomnav extends StatefulWidget {
@@ -22,7 +23,8 @@ class _bottomnavState extends State<bottomnav> {
     super.initState();
     _pages = [
       Home(viewModel: viewModel, salesmanData: widget.salesmanData,),
-      CustomerView(viewModel: viewModel, salesmanData: widget.salesmanData)
+      CustomerView(viewModel: viewModel, salesmanData: widget.salesmanData),
+      TransaksiHome(viewModel: viewModel, salesmanData: widget.salesmanData,)
     ];
   }
   int _currentIndex = 0;
@@ -76,7 +78,23 @@ class _bottomnavState extends State<bottomnav> {
                   height: 24, // Set the desired height
                   color: Color(0xff0029FF),
                 ),
-                label: "Materi",
+                label: "Home",
+              ),
+
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/customer.png',
+                  width: 24, // Set the desired width
+                  height: 24, // Set the desired height
+                  color: Color(0xff1C274C),
+                ),
+                activeIcon: Image.asset(
+                  'assets/customer_active.png',
+                  width: 24, // Set the desired width
+                  height: 24, // Set the desired height
+                  color: Color(0xff0029FF),
+                ),
+                label: "Lihat Customer",
               ),
 
               BottomNavigationBarItem(
@@ -92,7 +110,7 @@ class _bottomnavState extends State<bottomnav> {
                   height: 24, // Set the desired height
                   color: Color(0xff0029FF),
                 ),
-                label: "Materi",
+                label: "Transaksi Saya",
               ),
             ],
             onTap: (index) {

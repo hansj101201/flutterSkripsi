@@ -88,7 +88,8 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
       } else {
         displayedBarangs = widget.viewModel.barangs
             .where((barang) =>
-            barang.nama.toLowerCase().contains(query.toLowerCase()))
+            barang.nama.toLowerCase().contains(query.toLowerCase()) ||
+                barang.id.toLowerCase().contains(query.toLowerCase()))
             .toList();
         displayedBarangs.forEach((barang) {
           if (!barangControllers.containsKey(barang.nama)) {
@@ -131,6 +132,7 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
     DateTime dateTime =
         DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Permintaan Kanvas'),
       ),
@@ -176,6 +178,7 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                       _searchController.clear();
                       _searchBarang('');
                     });
+                    FocusScope.of(context).unfocus();
                   },
                 ),
               ),
@@ -280,10 +283,13 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                                             barangControllers[barang.nama]?.text = formattedValue;
                                           },
                                           onEditingComplete: () {
-                                            // Simpan nilai asli (belum diformat) ke dalam controller
-                                            final formattedText = barangControllers[barang.nama]?.text;
+                                            // Perbarui nilai yang diformat ke dalam controller
+                                            final formattedText = barangControllers[barang.nama]?.text.replaceAll(',', '');
                                             final intValue = int.tryParse(formattedText ?? '0') ?? 0;
-                                            barangControllers[barang.nama]?.text = intValue.toString();
+                                            barangControllers[barang.nama]?.text = formatHarga(intValue);
+
+                                            // Tutup keyboard secara manual
+                                            FocusScope.of(context).unfocus();
                                           },
                                         ),
                                       ),

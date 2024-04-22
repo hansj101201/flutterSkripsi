@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_skripsi/Model/Customer.dart';
 import 'package:flutter_skripsi/View/Map.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,90 +15,166 @@ class CustomerView extends StatefulWidget {
 }
 
 class _CustomerViewState extends State<CustomerView> {
-  DateTime? _selectedDate;
+  late List<Customer> displayedCustomer;
   String? selectedValue;
   String? selectedGudangNama;
+
+  late TextEditingController _searchController;
+  late String searchText;
 
   @override
   void initState() {
     super.initState();
+    displayedCustomer = [];
+    searchText = '';
+    _searchController = TextEditingController();
+    _fetchCustomers();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCustomers() async {
+    await widget.viewModel.getCustomer(widget.salesmanData['ID_SALES']);
+    setState(() {
+      displayedCustomer = List.from(widget.viewModel.customer);
+    });
+  }
+
+  void _searchCustomer(String query) {
+    setState(() {
+      searchText = query;
+      if (query.isEmpty) {
+        displayedCustomer = widget.viewModel.customer.toList();
+      } else {
+        displayedCustomer = widget.viewModel.customer
+            .where((customer) =>
+        customer.nama.toLowerCase().contains(query.toLowerCase()) ||
+            customer.idCustomer.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Stok Kanvas'),
-      ),
-      body: FutureBuilder(
-        future: widget.viewModel.getCustomer(widget.salesmanData['ID_SALES']),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return Column(children: [
-              SizedBox(
-                height: 20,
+        appBar: AppBar(
+          title: Text('Data Customer'),
+          centerTitle: true,
+        ),
+        body: Column(children: [
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Cari Customer',
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear), // Icon silang
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchCustomer('');
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
               ),
-              // Tambahkan widget TextField dengan dropdown untuk daftar gudang di bawah TextFormField
-              SizedBox(height: 10.0),
-              Expanded(
-                  child: ListView.builder(
-                itemCount: widget.viewModel.customer.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final customer = widget.viewModel.customer[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 8.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          title:
-                              Text('${customer.idCustomer} - ${customer.nama}'),
-                          subtitle: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Tambahkan logika untuk menavigasi ke halaman detail di sini
-                                },
-                                child: Text('Detail'),
+              onChanged: _searchCustomer,
+            ),
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: ListView.builder(
+              itemCount: displayedCustomer.length,
+              itemBuilder: (BuildContext context, int index) {
+                final customer = displayedCustomer[index];
+                print(customer);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 8.0),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        onTap: () {
+
+                        },
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${customer.idCustomer} - ${customer.nama}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                String titik = customer.titikGps;
+                                List<String> koordinat = titik.split(',');
+                                double latitude = double.parse(koordinat[0]);
+                                double longitude = double.parse(koordinat[1]);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => MapScreen(
+                                    destination: LatLng(latitude, longitude),
+                                  ),
+                                ));
+                              },
+                              child: Row(
+                                children: [
+                                  ColorFiltered(
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.blue,
+                                      // Warna yang diinginkan (misalnya biru)
+                                      BlendMode.srcIn,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/direction.png',
+                                      // Ganti dengan path gambar Anda
+                                      width: 40,
+                                      // Sesuaikan dengan ukuran gambar Anda
+                                      height:
+                                      40, // Sesuaikan dengan ukuran gambar Anda
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Arah',
+                                    style:
+                                    TextStyle(fontStyle: FontStyle.italic),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 8),
-                              // Untuk memberi jarak antara dua tombol
-                              ElevatedButton(
-                                onPressed: () {
-                                  String titik = customer.titikGps;
-                                  List<String> koordinat = titik.split(
-                                      ','); // Pisahkan string dengan koma
-                                  double latitude = double.parse(koordinat[
-                                      0]); // Ambil latitude dari index 0
-                                  double longitude = double.parse(koordinat[
-                                      1]); // Ambil longitude dari index 1
-                                  // Tambahkan logika untuk menavigasi ke peta di sini
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => MapScreen(
-                                        destination:
-                                            LatLng(latitude, longitude)),
-                                  ));
-                                },
-                                child: Text('Map'),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              )),
-            ]);
-          }
-        },
-      ),
-    );
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              customer.alamat,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              customer.kota,
+                            ),
+                            SizedBox(height: 4),
+
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ]));
   }
 }

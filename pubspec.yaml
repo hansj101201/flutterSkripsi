@@ -39,6 +39,7 @@ dependencies:
   geolocator: ^11.0.0 # Versi terbaru paket geolocator
   dio: ^4.0.0
   flutter_polyline_points: ^2.0.0
+  flutter_keyboard_visibility: ^6.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -72,6 +73,9 @@ flutter:
    - assets/home_active.png
    - assets/list.png
    - assets/list_active.png
+   - assets/customer_active.png
+   - assets/customer.png
+   - assets/direction.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
