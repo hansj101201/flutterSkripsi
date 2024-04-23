@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/View/Map.dart';
-import 'package:flutter_skripsi/View/PengembalianCanvas.dart';
-import 'package:flutter_skripsi/View/PenjualanCanvas.dart';
-import 'package:flutter_skripsi/View/PermintaanCanvasView.dart';
-import 'package:flutter_skripsi/View/StockCanvasView.dart';
-import 'package:flutter_skripsi/ViewModel/SharedPref.dart';
-import 'package:flutter_skripsi/main.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_skripsi/View/LaporanPenerimaanView.dart';
+import 'package:flutter_skripsi/View/LaporanPengembalianView.dart';
+import 'package:flutter_skripsi/View/LaporanPermintaanView.dart';
 
 class TransaksiHome extends StatefulWidget {
   final Map<String, dynamic> salesmanData;
@@ -42,14 +36,18 @@ class _TransaksiHomeState extends State<TransaksiHome> {
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
-
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => LaporanPermintaan(viewModel: widget.viewModel, salesmanData: widget.salesmanData,),)
+                );
               },
               child: Text('Permintaan Barang'),
             ),
             SizedBox(height: 10.0),
             ElevatedButton(
               onPressed: () {
-
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => LaporanPenerimaan(viewModel: widget.viewModel, salesmanData: widget.salesmanData,),)
+                );
               },
               child: Text('Penerimaan Barang'),
             ),
@@ -65,7 +63,9 @@ class _TransaksiHomeState extends State<TransaksiHome> {
             ),
             ElevatedButton(
               onPressed: () {
-
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => LaporanPengembalian(viewModel: widget.viewModel, salesmanData: widget.salesmanData,),)
+                );
               },
               child: Text('Pengembalian Barang'),
             ),

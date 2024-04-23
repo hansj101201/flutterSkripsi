@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_skripsi/Model/Barang.dart';
+import 'package:flutter_skripsi/View/BuktiView.dart';
 import 'package:flutter_skripsi/ViewModel/Format.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 import 'package:intl/intl.dart';
@@ -278,7 +279,9 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                                             border: InputBorder.none,
                                           ),
                                           onChanged: (value) {
-                                            final intValue = int.parse(value);
+                                            final intValue = int.tryParse(value.replaceAll(
+                                                ",",
+                                                "")) ?? 0;
                                             final formattedValue = formatHarga(intValue);
                                             barangControllers[barang.nama]?.text = formattedValue;
                                           },
@@ -377,7 +380,7 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                     actions: <Widget>[
                       ElevatedButton(
                         onPressed: () async {
-                          final success = await widget.viewModel
+                          final response = await widget.viewModel
                               .postPermintaanSales(
                                   dateController.text,
                                   widget.salesmanData['ID_SALES'],
@@ -385,9 +388,11 @@ class _PermintaanKanvasState extends State<PermintaanKanvas> {
                                   getPeriode(dateController.text),
                                   widget.salesmanData['ID_DEPO'],
                                   sendData);
-                          if (success) {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
+                          if (response.responseData['success'] == true) {
+                            print("response ${response.responseData['bukti']}");
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => Bukti(mode: 'permintaan', bukti: response.responseData['bukti'],))
+                            );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text('Gagal menyimpan data'),

@@ -4,6 +4,9 @@ import 'package:flutter_skripsi/Model/Closing.dart';
 import 'package:flutter_skripsi/Model/Customer.dart';
 import 'package:flutter_skripsi/Model/Gudang.dart';
 import 'package:flutter_skripsi/Model/Stock.dart';
+import 'package:flutter_skripsi/Model/laporanPenerimaan.dart';
+import 'package:flutter_skripsi/Model/laporanPengembalian.dart';
+import 'package:flutter_skripsi/Model/laporanPermintaan.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_skripsi/Model/Barang.dart';
 
@@ -14,6 +17,10 @@ class ViewModel {
   List<Gudang> _gudangs = [];
   List<Customer> _customer = [];
   List<Closing> _closing = [];
+  List<TransaksiPermintaan> _laporanPermintaan = [];
+  List<TransaksiPenerimaan> _laporanPenerimaan = [];
+  List<TransaksiPengembalian> _laporanPengembalian = [];
+
 
   List<Gudang> get gudangs => _gudangs;
   List<Barang> get barangs => _barangs;
@@ -21,6 +28,9 @@ class ViewModel {
   List<BarangHargaStock> get barangJualan => _barangJualan;
   List<Customer> get customer => _customer;
   List<Closing> get closing => _closing;
+  List<TransaksiPermintaan> get laporanPermintaan => _laporanPermintaan;
+  List<TransaksiPenerimaan> get laporanPenerimaan => _laporanPenerimaan;
+  List<TransaksiPengembalian> get laporanPengembalian => _laporanPengembalian;
 
 
   Future<void> getListGudang(String idDepo) async {
@@ -100,8 +110,48 @@ class ViewModel {
     }
   }
 
-  Future<bool> postPengembalianSales(String tanggal, String idSales, String idGudang, String idGudangTujuan, String periode, String idDepo, List<List<dynamic>> data) async {
-    final url = Uri.parse('http://192.168.1.14:8000/api/pengembalian/postPengembalian'); // Ganti dengan URL API pengembalian sales Anda
+  Future<void> getLaporanPermintaan(String idSales, String date) async {
+    final response = await http.get(Uri.parse('http://192.168.1.14:8000/api/laporanSales/getPermintaan/?ID_SALES=$idSales&TANGGAL=$date'));
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> dataMap = jsonDecode(response.body);
+      List<TransaksiPermintaan> transaksis = TransaksiPermintaan.listFromJson(dataMap);
+      _laporanPermintaan = transaksis;
+      print(_laporanPermintaan);
+    } else {
+      throw Exception('Failed to load stock data from API');
+    }
+  }
+
+  Future<void> getLaporanPenerimaan(String idSales, String date) async {
+    final response = await http.get(Uri.parse('http://192.168.1.14:8000/api/laporanSales/getPenerimaan/?ID_SALES=$idSales&TANGGAL=$date'));
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> dataMap = jsonDecode(response.body);
+      List<TransaksiPenerimaan> transaksis = TransaksiPenerimaan.listFromJson(dataMap);
+      _laporanPenerimaan = transaksis;
+      print(_laporanPenerimaan);
+    } else {
+      throw Exception('Failed to load stock data from API');
+    }
+  }
+
+  Future<void> getLaporanPengembalian(String idSales, String date) async {
+    final response = await http.get(Uri.parse('http://192.168.1.14:8000/api/laporanSales/getPengembalian/?ID_SALES=$idSales&TANGGAL=$date'));
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> dataMap = jsonDecode(response.body);
+      List<TransaksiPengembalian> transaksis = TransaksiPengembalian.listFromJson(dataMap);
+      _laporanPengembalian = transaksis;
+      print(_laporanPengembalian);
+    } else {
+      throw Exception('Failed to load stock data from API');
+    }
+  }
+
+  Future<PostPengembalianSalesResult> postPengembalianSales(String tanggal, String idSales, String idGudang, String idGudangTujuan, String periode, String idDepo, List<List<dynamic>> data) async {
+    final url = Uri.parse(
+        'http://192.168.1.14:8000/api/pengembalian/postPengembalian'); // Ganti dengan URL API pengembalian sales Anda
     final response = await http.post(
       url,
       body: jsonEncode({
@@ -109,23 +159,23 @@ class ViewModel {
         'ID_SALES': idSales,
         'ID_GUDANG': idGudang,
         'ID_DEPO': idDepo,
-        'PERIODE' : periode,
+        'PERIODE': periode,
         'ID_GUDANG_TUJUAN': idGudangTujuan,
-        'DATA' : data,
+        'DATA': data,
       }),
       headers: {'Content-Type': 'application/json'},
     );
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      return true;
+      return PostPengembalianSalesResult(true, responseData);
     } else {
       final responseData = jsonDecode(response.body);
-      return false;
+      return PostPengembalianSalesResult(false, responseData);
     }
   }
 
-  Future<bool> postPermintaanSales(String tanggal, String idSales, String idGudang, String periode, String idDepo, List<List<dynamic>> data) async {
+  Future<PostPermintaanSalesResult> postPermintaanSales(String tanggal, String idSales, String idGudang, String periode, String idDepo, List<List<dynamic>> data) async {
     final url = Uri.parse('http://192.168.1.14:8000/api/permintaan/postPermintaan'); // Ganti dengan URL API permintaan sales Anda
     final response = await http.post(
       url,
@@ -142,14 +192,15 @@ class ViewModel {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      return true;
+      print (responseData);
+      return PostPermintaanSalesResult(true, responseData);
     } else {
       final responseData = jsonDecode(response.body);
-      return false;
+      return PostPermintaanSalesResult(false, responseData);
     }
   }
 
-  Future<bool> postPenjualan(String tanggal, String idSales, String idGudang, String idCustomer, String periode, String namaCustomer, String idDepo, String jumlah, String discount, String netto, List<List<dynamic>> data) async {
+  Future<PostPenjualanSalesResult> postPenjualan(String tanggal, String idSales, String idGudang, String idCustomer, String periode, String namaCustomer, String idDepo, String jumlah, String discount, String netto, List<List<dynamic>> data) async {
     final url = Uri.parse('http://192.168.1.14:8000/api/penjualan/postPenjualanCanvas'); // Ganti dengan URL API permintaan sales Anda
     final response = await http.post(
       url,
@@ -172,10 +223,31 @@ class ViewModel {
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
       print(responseData);
-      return true;
+      return PostPenjualanSalesResult(true, responseData);
     } else {
       final responseData = jsonDecode(response.body);
-      return false;
+      return PostPenjualanSalesResult(false, responseData);
     }
   }
+}
+
+class PostPermintaanSalesResult {
+  final bool success;
+  final dynamic responseData;
+
+  PostPermintaanSalesResult(this.success, this.responseData);
+}
+
+class PostPenjualanSalesResult {
+  final bool success;
+  final dynamic responseData;
+
+  PostPenjualanSalesResult(this.success, this.responseData);
+}
+
+class PostPengembalianSalesResult {
+  final bool success;
+  final dynamic responseData;
+
+  PostPengembalianSalesResult(this.success, this.responseData);
 }

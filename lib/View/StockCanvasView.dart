@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/ViewModel/BarangViewModel.dart';
+import 'package:flutter_skripsi/TidakDipakai/BarangViewModel.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class StockCanvasView extends StatefulWidget {

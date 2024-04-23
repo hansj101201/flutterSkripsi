@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_skripsi/ApiKeys.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
@@ -21,17 +22,12 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? currentLocation;
   Set<Polyline> _polylines = {};
   Set<Marker> _markers = {};
-  String apiKey =
-      'AIzaSyBSaSZNd8RPSWMlPsu1qXN6F9r1aMxY2Kg'; // Ganti dengan kunci API Google Maps Anda
-
+  String apiKey = ApiKeys.googleMapsApiKey;
   String distance = '';
   String duration = '';
-
-  // Tambahkan variabel untuk marker lokasi saat ini
   Marker? currentLocationMarker;
-
-  // Tambahkan variabel mapLoaded
   bool mapLoaded = false;
+  bool isCurrentLocationInsideScreen = true;
 
   @override
   void initState() {
@@ -74,16 +70,18 @@ class _MapScreenState extends State<MapScreen> {
 
     setState(() {
       currentLocation = LatLng(newPosition!.latitude, newPosition.longitude);
-      // Update marker untuk lokasi saat ini
       _updateCurrentLocationMarker(currentLocation!);
-      // Mengatur rute dengan lokasi saat ini sebagai titik awal
       _setRoute();
 
-      // Panggil _recenterMap jika peta telah dimuat
-      if (mapLoaded) {
+      if (mapLoaded && !isCurrentLocationInsideScreen) {
         _recenterMap(currentLocation!);
+        isCurrentLocationInsideScreen = true; // Setel kembali status
       }
     });
+
+    if (!isCurrentLocationInsideScreen) {
+      _checkCurrentLocationInsideScreen();
+    }
   }
 
   // Metode untuk menambah/memperbarui marker lokasi saat ini
@@ -112,7 +110,6 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  // Metode untuk mengatur rute
   Future<void> _setRoute() async {
     String url =
         'https://routes.googleapis.com/directions/v2:computeRoutes?key=$apiKey';
@@ -165,6 +162,7 @@ class _MapScreenState extends State<MapScreen> {
         String encodedPolyline = data['routes'][0]['polyline']['encodedPolyline'];
         points = _decodePolyline(encodedPolyline);
 
+        _polylines.clear(); // Perbarui polyline
         // Add polyline to _polylines
         _polylines.add(Polyline(
           polylineId: PolylineId('route'),
@@ -188,7 +186,6 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
   }
-
 
   // Metode untuk mengonstruksi polyline
   List<LatLng> _decodePolyline(String encoded) {
@@ -236,6 +233,21 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  // Metode untuk memeriksa apakah current location berada di dalam layar
+  Future<void> _checkCurrentLocationInsideScreen() async {
+    if (currentLocation != null && mapController != null) {
+      final screenCoordinate = await mapController.getScreenCoordinate(currentLocation!);
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      if (screenCoordinate.x < 0 || screenCoordinate.x > screenWidth ||
+          screenCoordinate.y < 0 || screenCoordinate.y > screenHeight) {
+        isCurrentLocationInsideScreen = false;
+      } else {
+        isCurrentLocationInsideScreen = true;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,14 +258,37 @@ class _MapScreenState extends State<MapScreen> {
           ? Column(
         children: [
           Expanded(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: initialLocation!,
-                zoom: 15,
-              ),
-              onMapCreated: _onMapCreated,
-              polylines: _polylines,
-              markers: _markers,
+            child: Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: initialLocation!,
+                    zoom: 15,
+                  ),
+                  onMapCreated: _onMapCreated,
+                  polylines: _polylines,
+                  markers: _markers,
+                  myLocationEnabled: true,
+                  onCameraMove: (CameraPosition position) {
+                    // Ubah status current location berada di dalam layar saat pengguna memindahkan peta
+                    isCurrentLocationInsideScreen = true;
+                  },
+                ),
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  right: null,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      // Recentralisasi peta ketika tombol ditekan
+                      if (currentLocation != null) {
+                        _recenterMap(currentLocation!);
+                      }
+                    },
+                    child: Icon(Icons.my_location),
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
