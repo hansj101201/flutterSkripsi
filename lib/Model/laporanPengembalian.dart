@@ -25,26 +25,19 @@ class TransaksiPengembalian {
     required this.gudangNama,
   });
 
-  static List<TransaksiPengembalian> listFromJson(Map<String, dynamic> json) {
-    List<TransaksiPengembalian> transaksis = [];
-    json.forEach((key, value) {
-      List<dynamic> transaksiList = value;
-      transaksiList.forEach((transactionJson) {
-        transaksis.add(TransaksiPengembalian(
-          id: transactionJson['ID'],
-          kodeTransaksi: transactionJson['KDTRN'],
-          tanggal: transactionJson['TANGGAL'],
-          bukti: transactionJson['BUKTI'],
-          periode: transactionJson['PERIODE'],
-          idDepo: transactionJson['ID_DEPO'],
-          idGudang: transactionJson['ID_GUDANG'],
-          idBarang: transactionJson['ID_BARANG'],
-          nama: transactionJson['NAMASINGKAT'],
-          jumlahItem: double.parse(transactionJson['QTY']),
-          gudangNama: transactionJson['NAMA'],
-        ));
-      });
-    });
-    return transaksis;
+  factory TransaksiPengembalian.fromJson(Map<String, dynamic> json) {
+    return TransaksiPengembalian(
+      id: json['ID'],
+      kodeTransaksi: json['KDTRN'],
+      tanggal: json['TANGGAL'],
+      bukti: json['BUKTI'],
+      periode: json['PERIODE'],
+      idDepo: json['ID_DEPO'],
+      idGudang: json['ID_GUDANG'],
+      idBarang: json['ID_BARANG'],
+      nama: json['NAMASINGKAT'],
+      jumlahItem: double.parse(json['QTY']),
+      gudangNama: json['NAMA'],
+    );
   }
 }

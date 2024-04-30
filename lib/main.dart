@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/View/Login.dart';
-import 'package:flutter_skripsi/View/LoginWithData.dart'; // Import LoginWithData.dart
-import 'package:flutter_skripsi/View/NavigationBar.dart';
+import 'package:flutter_skripsi/View/Login/Login.dart';
+import 'package:flutter_skripsi/View/Login/LoginWithData.dart';
+import 'package:flutter_skripsi/View/BottomNav/NavigationBar.dart';
 import 'package:flutter_skripsi/ViewModel/SharedPref.dart';
 import 'package:geolocator/geolocator.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_skripsi/Model/BarangHargaStock.dart';
 import 'package:flutter_skripsi/Model/Customer.dart';
-import 'package:flutter_skripsi/View/BuktiView.dart';
+import 'package:flutter_skripsi/View/Transaksi/BuktiView.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_skripsi/ViewModel/Format.dart';
@@ -229,7 +229,10 @@ class _PenjualanViewState extends State<PenjualanView> {
           Padding(
             padding: const EdgeInsets.only(right: 9.0),
             child: IconButton(
-              icon: Icon(Icons.arrow_forward),
+              icon: Icon(
+                Icons.arrow_forward,
+                color: Colors.white, // Mengatur warna ikon menjadi putih
+              ),
               iconSize: 40,
               onPressed: () {
                 {
@@ -264,8 +267,6 @@ class _PenjualanViewState extends State<PenjualanView> {
                     totalController.text = subtotalController.text;
                     nettoController.text = subtotalController.text;
 
-                    var periode = getPeriode(dateController.text);
-
                     // Tampilkan data yang akan dikirim
 
                     print(dateController.text);
@@ -282,94 +283,234 @@ class _PenjualanViewState extends State<PenjualanView> {
                             'Customer : $selectedValue - $selectedGudangNama',
                             style: TextStyle(fontSize: 30),
                           ),
-                          content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 10),
-                                Expanded(
-                                  child: Container(
-                                    width: double.maxFinite,
-                                    height: 300,
-                                    child: ListView.builder(
-                                      itemCount: sendData.length,
-                                      itemBuilder: (context, index) {
-                                        final item = sendData[index];
-                                        return ListTile(
-                                            title: Column(
-                                          children: [
-                                            Row(
+                          content: ConstrainedBox(
+                            constraints: BoxConstraints(),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 10),
+                                    Flexible(
+                                      child: Container(
+                                        width: double.maxFinite,
+                                        height: 300,
+                                        child: ListView.builder(
+                                          itemCount: sendData.length,
+                                          itemBuilder: (context, index) {
+                                            final item = sendData[index];
+                                            return ListTile(
+                                                title: Column(
                                               children: [
-                                                Text(
-                                                  '${item[1]}',
-                                                  style:
-                                                      TextStyle(fontSize: 25),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      '${item[1]}',
+                                                      style: TextStyle(
+                                                          fontSize: 25),
+                                                    ),
+                                                  ],
                                                 ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        '${formatHarga((item[3]).toInt())} x ${(formatHarga(item[2].toInt()))}',
+                                                        style: TextStyle(
+                                                            fontSize: 25),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      "${formatHarga((item[4].toInt()))}",
+                                                      style: TextStyle(
+                                                          fontSize: 25),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 20,
+                                                )
                                               ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    '${formatHarga((item[3]).toInt())} x ${(formatHarga(item[2].toInt()))}',
-                                                    style:
-                                                        TextStyle(fontSize: 25),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "${formatHarga((item[4].toInt()))}",
-                                                  style:
-                                                      TextStyle(fontSize: 25),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 20,
-                                            )
-                                          ],
-                                        ));
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  height: 100,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // Subtotal berada di sebelah kanan
-                                    children: [
-                                      Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          // Atur margin di sini
-                                          child: Text(
-                                            "Subtotal:",
-                                            style: TextStyle(fontSize: 30),
-                                          ),
+                                            ));
+                                          },
                                         ),
                                       ),
-                                      Flexible(
-                                        child: Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: Container(
-                                              width: 300,
-                                              height: 100,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(),
-                                                // Menambahkan border dengan garis solid
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                // Mengatur sudut border
-                                                color: Colors.grey[
-                                                    200], // Mengatur warna background
+                                    ),
+                                    Container(
+                                      height: 100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        // Subtotal berada di sebelah kanan
+                                        children: [
+                                          Flexible(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              // Atur margin di sini
+                                              child: Text(
+                                                "Subtotal:",
+                                                style: TextStyle(fontSize: 30),
                                               ),
-                                              child: Center(
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Container(
+                                                  width: 300,
+                                                  height: 100,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(),
+                                                    // Menambahkan border dengan garis solid
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    // Mengatur sudut border
+                                                    color: Colors.grey[
+                                                        200], // Mengatur warna background
+                                                  ),
+                                                  child: Center(
+                                                    child: TextField(
+                                                      enabled: false,
+                                                      controller:
+                                                          totalController,
+                                                      // Buat subtotal tidak dapat diedit
+                                                      style: TextStyle(
+                                                          fontSize: 30,
+                                                          color: Colors.black),
+                                                      // Mengubah warna teks menjadi hitam
+                                                      textAlign:
+                                                          TextAlign.right,
+                                                      // Mengatur teks agar rata kanan
+                                                      decoration:
+                                                          InputDecoration(
+                                                        border: InputBorder
+                                                            .none, // Menghilangkan garis bawah
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        // Subtotal berada di sebelah kanan
+                                        children: [
+                                          Flexible(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              // Atur margin di sini
+                                              child: Text(
+                                                "Potongan:",
+                                                style: TextStyle(fontSize: 30),
+                                              ),
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child: Container(
+                                                width: 300,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(),
+                                                  // Menambahkan border dengan garis solid
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10), // Mengatur sudut border
+                                                ),
                                                 child: TextField(
+                                                  controller:
+                                                      potonganController,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  // Menampilkan keyboard numerik
+                                                  inputFormatters: <TextInputFormatter>[
+                                                    FilteringTextInputFormatter
+                                                        .digitsOnly,
+                                                    // Hanya mengizinkan input angka
+                                                    TextInputFormatter
+                                                        .withFunction((oldValue,
+                                                            newValue) {
+                                                      // Format angka saat nilainya berubah
+                                                      final newString =
+                                                          formatHarga(int.parse(
+                                                              newValue.text));
+                                                      return TextEditingValue(
+                                                        text: newString,
+                                                        selection: TextSelection
+                                                            .collapsed(
+                                                                offset: newString
+                                                                    .length),
+                                                      );
+                                                    }),
+                                                  ],
+                                                  style: TextStyle(
+                                                      fontSize: 30,
+                                                      color: Colors.black),
+                                                  // Mengubah warna teks menjadi hitam
+                                                  textAlign: TextAlign.right,
+                                                  // Mengatur teks agar rata kanan
+                                                  decoration: InputDecoration(
+                                                    border: InputBorder
+                                                        .none, // Menghilangkan garis bawah
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        // Subtotal berada di sebelah kanan
+                                        children: [
+                                          Flexible(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              // Atur margin di sini
+                                              child: Text(
+                                                "Netto:",
+                                                style: TextStyle(fontSize: 30),
+                                              ),
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child: Container(
+                                                width: 300,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(),
+                                                  // Menambahkan border dengan garis solid
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  // Mengatur sudut border
+                                                  color: Colors.grey[
+                                                      200], // Mengatur warna background
+                                                ),
+                                                child: TextField(
+                                                  controller: nettoController,
                                                   enabled: false,
-                                                  controller: totalController,
                                                   // Buat subtotal tidak dapat diedit
                                                   style: TextStyle(
                                                       fontSize: 30,
@@ -383,134 +524,14 @@ class _PenjualanViewState extends State<PenjualanView> {
                                                   ),
                                                 ),
                                               ),
-                                            )),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  height: 100,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // Subtotal berada di sebelah kanan
-                                    children: [
-                                      Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          // Atur margin di sini
-                                          child: Text(
-                                            "Potongan:",
-                                            style: TextStyle(fontSize: 30),
-                                          ),
-                                        ),
-                                      ),
-                                      Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Container(
-                                            width: 300,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(),
-                                              // Menambahkan border dengan garis solid
-                                              borderRadius: BorderRadius.circular(
-                                                  10), // Mengatur sudut border
-                                            ),
-                                            child: TextField(
-                                              controller: potonganController,
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              // Menampilkan keyboard numerik
-                                              inputFormatters: <TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly,
-                                                // Hanya mengizinkan input angka
-                                                TextInputFormatter.withFunction(
-                                                    (oldValue, newValue) {
-                                                  // Format angka saat nilainya berubah
-                                                  final newString = formatHarga(
-                                                      int.parse(newValue.text));
-                                                  return TextEditingValue(
-                                                    text: newString,
-                                                    selection:
-                                                        TextSelection.collapsed(
-                                                            offset: newString
-                                                                .length),
-                                                  );
-                                                }),
-                                              ],
-                                              style: TextStyle(
-                                                  fontSize: 30,
-                                                  color: Colors.black),
-                                              // Mengubah warna teks menjadi hitam
-                                              textAlign: TextAlign.right,
-                                              // Mengatur teks agar rata kanan
-                                              decoration: InputDecoration(
-                                                border: InputBorder
-                                                    .none, // Menghilangkan garis bawah
-                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  height: 100,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // Subtotal berada di sebelah kanan
-                                    children: [
-                                      Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          // Atur margin di sini
-                                          child: Text(
-                                            "Netto:",
-                                            style: TextStyle(fontSize: 30),
-                                          ),
-                                        ),
-                                      ),
-                                      Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Container(
-                                            width: 300,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(),
-                                              // Menambahkan border dengan garis solid
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              // Mengatur sudut border
-                                              color: Colors.grey[
-                                                  200], // Mengatur warna background
-                                            ),
-                                            child: TextField(
-                                              controller: nettoController,
-                                              enabled: false,
-                                              // Buat subtotal tidak dapat diedit
-                                              style: TextStyle(
-                                                  fontSize: 30,
-                                                  color: Colors.black),
-                                              // Mengubah warna teks menjadi hitam
-                                              textAlign: TextAlign.right,
-                                              // Mengatur teks agar rata kanan
-                                              decoration: InputDecoration(
-                                                border: InputBorder
-                                                    .none, // Menghilangkan garis bawah
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ]),
+                                    ),
+                                  ]),
+                            ),
+                          ),
                           actions: <Widget>[
                             Padding(
                               padding: EdgeInsets.only(right: 16.0),
@@ -540,12 +561,15 @@ class _PenjualanViewState extends State<PenjualanView> {
                                       true) {
                                     print(
                                         "response ${response.responseData['bukti']}");
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(
                                             builder: (context) => Bukti(
                                                   mode: 'penjualan',
                                                   bukti: response
                                                       .responseData['bukti'],
+                                                  viewModel: widget.viewModel,
                                                 )));
                                   } else {
                                     ScaffoldMessenger.of(context)
@@ -555,7 +579,28 @@ class _PenjualanViewState extends State<PenjualanView> {
                                     ));
                                   }
                                 },
-                                child: Text('Proses'),
+                                style: ButtonStyle(
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20.0), // Atur tingkat kebulatan di sini
+                                    ),
+                                  ),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.green),
+                                  // Ubah warna latar belakang di sini
+                                  padding: MaterialStateProperty.all(
+                                      EdgeInsets.symmetric(
+                                          vertical: 10.0,
+                                          horizontal:
+                                              20.0)), // Atur padding di sini
+                                ),
+                                child: Text(
+                                  'Proses',
+                                  style: TextStyle(fontSize: 25),
+                                ),
                               ),
                             ),
                             Padding(
@@ -565,7 +610,28 @@ class _PenjualanViewState extends State<PenjualanView> {
                                   // Batal
                                   Navigator.of(context).pop();
                                 },
-                                child: Text('Kembali'),
+                                style: ButtonStyle(
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20.0), // Atur tingkat kebulatan di sini
+                                    ),
+                                  ),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.red),
+                                  // Ubah warna latar belakang di sini
+                                  padding: MaterialStateProperty.all(
+                                      EdgeInsets.symmetric(
+                                          vertical: 10.0,
+                                          horizontal:
+                                              20.0)), // Atur padding di sini
+                                ),
+                                child: Text(
+                                  'Kembali',
+                                  style: TextStyle(fontSize: 25),
+                                ),
                               ),
                             ),
                           ],
@@ -699,7 +765,7 @@ class _PenjualanViewState extends State<PenjualanView> {
             height: 10,
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: TextFormField(
               controller: _searchController,
               decoration: InputDecoration(

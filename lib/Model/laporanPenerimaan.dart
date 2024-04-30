@@ -27,27 +27,20 @@ class TransaksiPenerimaan {
     required this.gudangNama,
   });
 
-  static List<TransaksiPenerimaan> listFromJson(Map<String, dynamic> json) {
-    List<TransaksiPenerimaan> transaksis = [];
-    json.forEach((key, value) {
-      List<dynamic> transaksiList = value;
-      transaksiList.forEach((transactionJson) {
-        transaksis.add(TransaksiPenerimaan(
-          id: transactionJson['ID'],
-          kodeTransaksi: transactionJson['KDTRN'],
-          tanggal: transactionJson['TANGGAL'],
-          bukti: transactionJson['BUKTI'],
-          periode: transactionJson['PERIODE'],
-          idDepo: transactionJson['ID_DEPO'],
-          idGudang: transactionJson['ID_GUDANG'],
-          nomorPermintaan: transactionJson['NOPERMINTAAN'],
-          idBarang: transactionJson['ID_BARANG'],
-          nama: transactionJson['NAMASINGKAT'],
-          jumlahItem: double.parse(transactionJson['QTY']),
-          gudangNama: transactionJson['NAMA'],
-        ));
-      });
-    });
-    return transaksis;
+  factory TransaksiPenerimaan.fromJson(Map<String, dynamic> json) {
+    return TransaksiPenerimaan(
+      id: json['ID'],
+      kodeTransaksi: json['KDTRN'],
+      tanggal: json['TANGGAL'],
+      bukti: json['BUKTI'],
+      periode: json['PERIODE'],
+      idDepo: json['ID_DEPO'],
+      idGudang: json['ID_GUDANG'],
+      nomorPermintaan: json['NOPERMINTAAN'],
+      idBarang: json['ID_BARANG'],
+      nama: json['NAMASINGKAT'],
+      jumlahItem: double.parse(json['QTY']),
+      gudangNama: json['NAMA'],
+    );
   }
 }

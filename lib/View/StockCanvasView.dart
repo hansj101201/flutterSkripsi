@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/TidakDipakai/BarangViewModel.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class StockCanvasView extends StatefulWidget {
@@ -23,7 +22,19 @@ class _StockCanvasViewState extends State<StockCanvasView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stok Kanvas'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), // Icon bawaan tombol kembali
+          iconSize: 40, // Atur ukuran ikon tombol kembali di sini
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          'Stok Gudang Sales',
+          style: TextStyle(fontSize: 30),
+        ),
+        centerTitle: true,
+        toolbarHeight: 100,
       ),
       body: FutureBuilder(
         future: widget.viewModel.checkStockSalesFromApi(widget.salesmanData['ID_GUDANG']),
@@ -43,8 +54,16 @@ class _StockCanvasViewState extends State<StockCanvasView> {
                     children: [
                       ListTile(
                         contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        title: Text(stocks.nama),
-                        subtitle: Text('ID: ${stocks.id} - Stok: ${stocks.saldo}'),
+                        title: Text(
+                          '${stocks.id} - ${stocks.nama}',
+                          style: TextStyle(
+                              fontSize: 30),
+                        ),
+                        trailing: Text(
+                          'Stok: ${stocks.saldo.toStringAsFixed(0)} ${stocks.namaSatuan}',
+                          style: TextStyle(
+                              fontSize: 30),
+                        ),
                         onTap: () {
                           // Tambahkan logika untuk menavigasi ke halaman detail barang di sini
                         },

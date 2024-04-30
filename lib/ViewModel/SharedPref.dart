@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/View/Home.dart';
+import 'package:flutter_skripsi/View/BottomNav/Home.dart';
 import 'package:flutter_skripsi/ViewModel/LocalAuth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,6 +49,12 @@ Future<void> checkLoginTimeAndSetLoggedOut() async {
   }
 }
 
+Future<void> changeFingerprintLogin() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool fingerprintLogin = await checkFingerprintLoginStatus(); // Mengecek status saat ini
+  await prefs.setBool('fingerprintLogin', !fingerprintLogin); // Mengubah status menjadi kebalikannya
+}
+
 Future<bool> checkIfLoggedIn() async {
   // Mendapatkan instance dari Shared Preferences
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -59,10 +65,8 @@ Future<bool> checkIfLoggedIn() async {
 
 Future<bool> checkFingerprintLoginStatus() async {
   try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? fingerprintLoginEnabled = prefs.getBool('fingerprintLogin');
-
-    return fingerprintLoginEnabled == true;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('fingerprintLogin') ?? false; // Default value false jika tidak ada data
   } catch (e) {
     print('Error: $e');
     return false;

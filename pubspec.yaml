@@ -40,7 +40,12 @@ dependencies:
   dio: ^4.0.0
   flutter_polyline_points: ^2.0.0
   flutter_keyboard_visibility: ^6.0.0
-
+  mailer: any
+  pdf: ^3.10.8
+  path_provider: ^2.1.3
+  open_file: ^3.3.2
+  flutter_pdfview: ^1.3.2
+  share: ^2.0.4
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -69,13 +74,21 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-   - assets/home.png
-   - assets/home_active.png
-   - assets/list.png
-   - assets/list_active.png
-   - assets/customer_active.png
-   - assets/customer.png
-   - assets/direction.png
+   - assets/pictures/home.png
+   - assets/pictures/home_active.png
+   - assets/pictures/list.png
+   - assets/pictures/list_active.png
+   - assets/pictures/customer_active.png
+   - assets/pictures/customer.png
+   - assets/pictures/direction.png
+   - assets/fonts/NotoSans-Bold.ttf
+   - assets/fonts/NotoSans-Regular.ttf
+   - assets/pictures/user.png
+   - assets/pictures/user_active.png
+   - assets/pictures/stock.png
+   - assets/pictures/request.png
+   - assets/pictures/return.png
+   - assets/pictures/sales.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

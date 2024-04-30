@@ -252,7 +252,12 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Map'),
+        title: Text(
+          'Map',
+          style: TextStyle(fontSize: 30),
+        ),
+        centerTitle: true,
+        toolbarHeight: 100,
       ),
       body: initialLocation != null
           ? Column(

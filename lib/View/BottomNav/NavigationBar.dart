@@ -1,9 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_skripsi/View/CustomWillPopScope.dart';
-import 'package:flutter_skripsi/View/CustomerView.dart';
-import 'package:flutter_skripsi/View/Home.dart';
-import 'package:flutter_skripsi/View/TransaksiHome.dart';
+import 'package:flutter_skripsi/View/BottomNav/Profile.dart';
+import 'package:flutter_skripsi/View/CustomBackButton/CustomWillPopScope.dart';
+import 'package:flutter_skripsi/View/BottomNav/CustomerView.dart';
+import 'package:flutter_skripsi/View/BottomNav/Home.dart';
+import 'package:flutter_skripsi/View/BottomNav/TransaksiHome.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 
 class bottomnav extends StatefulWidget {
@@ -24,7 +25,8 @@ class _bottomnavState extends State<bottomnav> {
     _pages = [
       Home(viewModel: viewModel, salesmanData: widget.salesmanData,),
       CustomerView(viewModel: viewModel, salesmanData: widget.salesmanData),
-      TransaksiHome(viewModel: viewModel, salesmanData: widget.salesmanData,)
+      TransaksiHome(viewModel: viewModel, salesmanData: widget.salesmanData,),
+      ProfilePage(salesmanData: widget.salesmanData)
     ];
   }
   int _currentIndex = 0;
@@ -40,6 +42,7 @@ class _bottomnavState extends State<bottomnav> {
       ),
 
       bottomNavigationBar: Container(
+        height: 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.0), // Adjust the radius as needed
@@ -67,31 +70,32 @@ class _bottomnavState extends State<bottomnav> {
             items: [
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/home.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/home.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff1C274C),
                 ),
                 activeIcon: Image.asset(
-                  'assets/home_active.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/home_active.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff0029FF),
                 ),
                 label: "Home",
+
               ),
 
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/customer.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/customer.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff1C274C),
                 ),
                 activeIcon: Image.asset(
-                  'assets/customer_active.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/customer_active.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff0029FF),
                 ),
                 label: "Lihat Customer",
@@ -99,18 +103,33 @@ class _bottomnavState extends State<bottomnav> {
 
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/list.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/list.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff1C274C),
                 ),
                 activeIcon: Image.asset(
-                  'assets/list_active.png',
-                  width: 24, // Set the desired width
-                  height: 24, // Set the desired height
+                  'assets/pictures/list_active.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
                   color: Color(0xff0029FF),
                 ),
                 label: "Transaksi Saya",
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/pictures/user.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
+                  color: Color(0xff1C274C),
+                ),
+                activeIcon: Image.asset(
+                  'assets/pictures/user_active.png',
+                  width: 40, // Set the desired width
+                  height: 40, // Set the desired height
+                  color: Color(0xff0029FF),
+                ),
+                label: "Akun Saya",
               ),
             ],
             onTap: (index) {
@@ -118,6 +137,8 @@ class _bottomnavState extends State<bottomnav> {
                 _currentIndex = index;
               });
             },
+            selectedFontSize: 18,
+            unselectedFontSize: 18,
           ),
         ),
       ),

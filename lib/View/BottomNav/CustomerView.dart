@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_skripsi/Model/Customer.dart';
+import 'package:flutter_skripsi/View/CustomerDetail.dart';
 import 'package:flutter_skripsi/View/Map.dart';
 import 'package:flutter_skripsi/ViewModel/ViewModel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -52,8 +53,8 @@ class _CustomerViewState extends State<CustomerView> {
       } else {
         displayedCustomer = widget.viewModel.customer
             .where((customer) =>
-        customer.nama.toLowerCase().contains(query.toLowerCase()) ||
-            customer.idCustomer.toLowerCase().contains(query.toLowerCase()))
+                customer.nama.toLowerCase().contains(query.toLowerCase()) ||
+                customer.idCustomer.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -63,8 +64,12 @@ class _CustomerViewState extends State<CustomerView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Data Customer'),
+          title: Text(
+            'Data Customer',
+            style: TextStyle(fontSize: 30),
+          ),
           centerTitle: true,
+          toolbarHeight: 100,
         ),
         body: Column(children: [
           SizedBox(height: 20),
@@ -103,7 +108,11 @@ class _CustomerViewState extends State<CustomerView> {
                     children: [
                       ListTile(
                         onTap: () {
-
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => CustomerDetail(
+                              customer: customer,
+                            ),
+                          ));
                         },
                         contentPadding: EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 16.0),
@@ -112,7 +121,8 @@ class _CustomerViewState extends State<CustomerView> {
                           children: [
                             Text(
                               '${customer.idCustomer} - ${customer.nama}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 30),
                             ),
                             InkWell(
                               onTap: () {
@@ -135,19 +145,18 @@ class _CustomerViewState extends State<CustomerView> {
                                       BlendMode.srcIn,
                                     ),
                                     child: Image.asset(
-                                      'assets/direction.png',
+                                      'assets/pictures/direction.png',
                                       // Ganti dengan path gambar Anda
-                                      width: 40,
-                                      // Sesuaikan dengan ukuran gambar Anda
-                                      height:
-                                      40, // Sesuaikan dengan ukuran gambar Anda
+                                      width: 50,
+                                      height: 50,
                                     ),
                                   ),
                                   SizedBox(width: 4),
                                   Text(
                                     'Arah',
-                                    style:
-                                    TextStyle(fontStyle: FontStyle.italic),
+                                    style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 30),
                                   ),
                                 ],
                               ),
@@ -159,13 +168,14 @@ class _CustomerViewState extends State<CustomerView> {
                           children: [
                             Text(
                               customer.alamat,
+                              style: TextStyle(fontSize: 30),
                             ),
                             SizedBox(height: 4),
                             Text(
                               customer.kota,
+                              style: TextStyle(fontSize: 30),
                             ),
                             SizedBox(height: 4),
-
                           ],
                         ),
                       ),
